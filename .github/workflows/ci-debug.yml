@@ -48,7 +48,7 @@ jobs:
       - name: Build offline debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleOfflineDebug --stacktrace
+          ./gradlew :yuyansdk:testOfflineDebugUnitTest :app:assembleOfflineDebug --stacktrace
         env:
           RELEASE_STORE_FILE: keystore/debug.jks
           RELEASE_STORE_PASSWORD: android
