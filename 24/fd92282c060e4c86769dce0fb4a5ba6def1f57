@@ -1,0 +1,19 @@
+yuyansdk
+  s_239592eb13c2c0::t_b8976596308510 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "24fd92282c060e4c86769dce0fb4a5ba6def1f57",
+  "prompts": {},
+  "sessions": {
+    "s_239592eb13c2c0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0bd2a-8f21-7233-82ef-a4deb60f022f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "will-911"
+    }
+  }
+}
