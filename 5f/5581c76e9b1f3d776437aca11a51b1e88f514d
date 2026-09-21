@@ -1,0 +1,21 @@
+.github/workflows/ci-debug.yml
+  s_239592eb13c2c0::t_978d8d930f3edd 1-70
+.gitmodules
+  s_239592eb13c2c0::t_111f7eb2a085c8 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "5f5581c76e9b1f3d776437aca11a51b1e88f514d",
+  "prompts": {},
+  "sessions": {
+    "s_239592eb13c2c0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0bd2a-8f21-7233-82ef-a4deb60f022f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Will Yu <will.yu@zoom.us>"
+    }
+  }
+}
