@@ -1,4 +1,4 @@
-name: CI Debug APK
+name: CI Debug and Release APKs
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build offline debug APK
+    name: Build offline debug and release APKs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,10 +48,10 @@ jobs:
             -keysize 2048 \
             -validity 10000
 
-      - name: Build offline debug APK
+      - name: Build offline debug and release APKs
         run: |
           chmod +x gradlew
-          ./gradlew :yuyansdk:testOfflineDebugUnitTest :app:assembleOfflineDebug --stacktrace
+          ./gradlew :yuyansdk:testOfflineDebugUnitTest :app:assembleOfflineDebug :app:assembleOfflineRelease --stacktrace
         env:
           RELEASE_STORE_FILE: keystore/debug.jks
           RELEASE_STORE_PASSWORD: android
@@ -63,5 +63,13 @@ jobs:
         with:
           name: yuyan-normal17-debug-${{ github.sha }}
           path: app/build/outputs/apk/offline/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuyan-normal17-release-${{ github.sha }}
+          path: app/build/outputs/apk/offline/release/*.apk
           if-no-files-found: error
           retention-days: 14
