@@ -1,21 +1,17 @@
-name: CI Release APK
+name: CI Debug and Release APKs
 
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
+      - 'feature/*17'
   workflow_dispatch:
-
 concurrency:
-  group: ci-release-${{ github.ref }}
+  group: ci-debug-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Test and build offline release APK
+    name: Build offline debug and release APKs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -33,6 +29,14 @@ jobs:
           sudo apt-get install -y librime-bin
           chmod +x yuyansdk/rime-source/rebuild-zx17-prism.sh
           yuyansdk/rime-source/rebuild-zx17-prism.sh
+
+      - name: Upload generated ZX17 prism
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuyan-zx17-prism-${{ github.sha }}
+          path: yuyansdk/src/main/assets/rime/build/double_pinyin_zx17.prism.bin
+          if-no-files-found: error
+          retention-days: 14
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -49,7 +53,7 @@ jobs:
       - name: Install Android SDK 36
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
 
-      - name: Create temporary CI signing keystore
+      - name: Create temporary debug keystore
         run: |
           mkdir -p keystore
           keytool -genkeypair \
@@ -62,21 +66,28 @@ jobs:
             -keysize 2048 \
             -validity 10000
 
-      - name: Run SDK tests and build offline release APK
+      - name: Build offline debug and release APKs
         run: |
           chmod +x gradlew
-          ./gradlew :yuyansdk:testOfflineDebugUnitTest :app:assembleOfflineRelease --stacktrace
+          ./gradlew :yuyansdk:testOfflineDebugUnitTest :app:assembleOfflineDebug :app:assembleOfflineRelease --stacktrace
         env:
           RELEASE_STORE_FILE: keystore/debug.jks
           RELEASE_STORE_PASSWORD: android
           RELEASE_KEY_ALIAS: androiddebugkey
           RELEASE_KEY_PASSWORD: android
 
-      # This is a CI artifact signed with an ephemeral key, not a published release.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuyan-zx17-debug-${{ github.sha }}
+          path: app/build/outputs/apk/offline/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: yuyan-offline-release-${{ github.sha }}
+          name: yuyan-zx17-release-${{ github.sha }}
           path: app/build/outputs/apk/offline/release/*.apk
           if-no-files-found: error
           retention-days: 14
