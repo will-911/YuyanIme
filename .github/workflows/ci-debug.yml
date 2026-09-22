@@ -42,7 +42,7 @@ jobs:
               . ./rime-source/frost.lock
               apk add --no-cache bash curl python3 "$RIME_COMPILER_PACKAGE"
               expected_package="$(printf "%s" "$RIME_COMPILER_PACKAGE" | tr = -)"
-              test "$(apk info -v librime-tools)" = "$expected_package"
+              apk info -v | grep -Fqx "$expected_package"
               ./rime-source/build-rime-assets.sh /workspace/rime-artifacts
             '
 
