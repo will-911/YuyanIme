@@ -1,0 +1,21 @@
+.github/workflows/ci-debug.yml
+  s_239592eb13c2c0::t_7a73a29526a2f2 13-15,26,28-31,33,36-37,50,82,90
+yuyansdk
+  s_239592eb13c2c0::t_17fe0f71645d0c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c12aa6b09b301bed1dd4a7c101b3d4f3224c6e4d",
+  "prompts": {},
+  "sessions": {
+    "s_239592eb13c2c0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0bd2a-8f21-7233-82ef-a4deb60f022f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "will-911"
+    }
+  }
+}
