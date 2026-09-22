@@ -5,59 +5,14 @@ on:
     branches:
       - 'feature/*17'
   workflow_dispatch:
-
 concurrency:
   group: ci-debug-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  rime-assets:
-    name: Build pinned rime-frost assets
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout source and SDK submodule
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
-
-      - name: Cache verified rime-frost archive
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/yuyan-rime
-          key: rime-frost-${{ hashFiles('yuyansdk/rime-source/frost.lock') }}
-
-      - name: Build all pinyin assets with pinned librime
-        run: |
-          source yuyansdk/rime-source/frost.lock
-          mkdir -p "$HOME/.cache/yuyan-rime" "$GITHUB_WORKSPACE/rime-artifacts"
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/workspace" \
-            -v "$HOME/.cache/yuyan-rime:/root/.cache/yuyan-rime" \
-            -w /workspace/yuyansdk \
-            "$RIME_BUILD_CONTAINER" \
-            sh -euxc '
-              . ./rime-source/frost.lock
-              apk add --no-cache bash curl python3 "$RIME_COMPILER_PACKAGE"
-              expected_package="$(printf "%s" "$RIME_COMPILER_PACKAGE" | tr = -)"
-              apk info -v | grep -Fqx "$expected_package"
-              ./rime-source/build-rime-assets.sh /workspace/rime-artifacts
-            '
-
-      - name: Upload reproducible Rime assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: yuyan-rime-frost-${{ github.sha }}
-          path: rime-artifacts/
-          if-no-files-found: error
-          retention-days: 14
-
   build:
     name: Build offline debug and release APKs
-    needs: rime-assets
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -67,18 +22,21 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install generated Rime assets
-        uses: actions/download-artifact@v5
-        with:
-          name: yuyan-rime-frost-${{ github.sha }}
-          path: yuyansdk/src/main/assets/rime/build
 
-      - name: Verify installed Rime assets
+      - name: Rebuild ZX17 Rime prism
         run: |
-          python3 yuyansdk/rime-source/verify-rime-assets.py \
-            --assets yuyansdk/src/main/assets/rime/build \
-            --expected-rime-version 1.11.2
+          sudo apt-get update
+          sudo apt-get install -y librime-bin
+          chmod +x yuyansdk/rime-source/rebuild-zx17-prism.sh
+          yuyansdk/rime-source/rebuild-zx17-prism.sh
 
+      - name: Upload generated ZX17 prism
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuyan-zx17-prism-${{ github.sha }}
+          path: yuyansdk/src/main/assets/rime/build/double_pinyin_zx17.prism.bin
+          if-no-files-found: error
+          retention-days: 14
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -89,6 +47,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
+          # The legacy "tools" package was removed from current SDK repositories.
           packages: platform-tools
 
       - name: Install Android SDK 36
@@ -120,7 +79,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: yuyan-normal17-debug-${{ github.sha }}
+          name: yuyan-zx17-debug-${{ github.sha }}
           path: app/build/outputs/apk/offline/debug/*.apk
           if-no-files-found: error
           retention-days: 14
@@ -128,7 +87,7 @@ jobs:
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: yuyan-normal17-release-${{ github.sha }}
+          name: yuyan-zx17-release-${{ github.sha }}
           path: app/build/outputs/apk/offline/release/*.apk
           if-no-files-found: error
           retention-days: 14
